@@ -833,11 +833,24 @@ async def handle_new_habit(message: Message, state: FSMContext):
 
 
 
+async def handle(request):
+    return web.Response(text="Bot is alive!")
+
 async def main():
     print("Bot started...")
-    asyncio.create_task(reminder_scheduler())
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+
+    # Запускаем HTTP-сервер на Render (обязательно нужен порт)
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", int(os.getenv("PORT", 10000)))
+    await site.start()
+
+    # Запускаем бота
+    asyncio.create_task(dp.start_polling(bot))
+    while True:
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
     asyncio.run(main())
