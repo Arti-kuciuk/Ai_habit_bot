@@ -732,6 +732,12 @@ async def ai_assistant_entry(message: Message, state: FSMContext):
     await state.set_state(HabitStates.AI_CHAT)
 
 
+@dp.message(HabitStates.AI_CHAT, F.text == "🔙 Back")
+async def exit_ai_chat(message: Message, state: FSMContext):
+    await message.answer("📋 Back to main menu.", reply_markup=main_menu_keyboard)
+    await state.clear()
+
+
 @dp.message(HabitStates.AI_CHAT)
 async def handle_ai_chat(message: Message, state: FSMContext):
     user_id = message.from_user.id
@@ -767,12 +773,6 @@ async def handle_ai_chat(message: Message, state: FSMContext):
     response = await generate_ai_advice(habit_name, description, goal, done, partial, missed, user_question)
 
     await message.answer(response) 
-
-
-@dp.message(HabitStates.AI_CHAT, F.text == "🔙 Back")
-async def exit_ai_chat(message: Message, state: FSMContext):
-    await message.answer("📋 Back to main menu.", reply_markup=main_menu_keyboard)
-    await state.clear()
 
 
 @dp.message(F.text == "❌ Cancel Habit")
